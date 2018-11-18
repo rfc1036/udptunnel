@@ -1,0 +1,11 @@
+[Unit]
+Description=Sockets for udptunnel-server
+Documentation=man:udptunnel(1)
+
+[Socket]
+ListenStream=0.0.0.0:443
+ListenStream=[::]:443
+
+[Install]
+WantedBy=sockets.target
+

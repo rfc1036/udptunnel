@@ -1,0 +1,28 @@
+[Unit]
+Description=udptunnel server
+Documentation=man:udptunnel(1)
+Requires=udptunnel-server.socket
+
+[Service]
+Type=notify
+Restart=on-failure
+ExecStart=/usr/local/sbin/udptunnel --server -v 127.0.0.1:25779
+StandardOutput=journal
+StandardError=journal
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RemoveIPC=yes
+SystemCallArchitectures=native
+

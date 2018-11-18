@@ -1,0 +1,29 @@
+[Unit]
+Description=udptunnel client
+Documentation=man:udptunnel(1)
+Requires=udptunnel-client.socket
+
+[Service]
+Type=notify
+Restart=on-failure
+RestartSec=30
+ExecStart=/usr/local/sbin/udptunnel server.example.net:443
+StandardOutput=journal
+StandardError=journal
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RemoveIPC=yes
+SystemCallArchitectures=native
+

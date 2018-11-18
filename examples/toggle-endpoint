@@ -1,0 +1,54 @@
+#!/bin/sh -e
+#
+# This script switches a wireguard tunnel between two endpoints.
+
+WG_IF='wg0'
+WG_PEER_KEY='Jy9syevJmxfBLKQMTazSFvgDeyS2Pv3+laYIDMlquRk='
+
+ENDPOINT_A='198.51.100.1:443'
+ENDPOINT_B='127.0.0.1:25779'
+
+##############################################################################
+wg_get_endpoint() {
+  local if="$1"
+  local key="$2"
+
+  local key_re
+  if [ "$key" ]; then
+    key_re="^$(echo $key | sed -re 's/\+/\\+/g')[[:space:]]"
+  else
+    key_re='.'
+  fi
+
+  [ "$if" -a -e /sys/class/net/$if/ ] || return 0
+  wg show "$if" endpoints | egrep "$key_re" | cut -f 2
+}
+
+wg_set_endpoint() {
+  local if="$1"
+  local peer_key="$2"
+
+  [ "$if" -a -e /sys/class/net/$if/ ] || return 0
+  wg set "$if" peer "$peer_key" endpoint "$3"
+}
+
+##############################################################################
+WG_ENDPOINT="$(wg_get_endpoint $WG_IF $WG_PEER_KEY)"
+
+case "$WG_ENDPOINT" in
+  "")
+    ;;
+  "$ENDPOINT_A")
+    wg_set_endpoint $WG_IF $WG_PEER_KEY $ENDPOINT_B
+    echo "Switched to endpoint $ENDPOINT_B."
+    ;;
+  "$ENDPOINT_B")
+    wg_set_endpoint $WG_IF $WG_PEER_KEY $ENDPOINT_A
+    echo "Switched to endpoint $ENDPOINT_A."
+    ;;
+  *)
+    echo "Unknown endpoint $WG_ENDPOINT!" >&2
+    exit 1
+    ;;
+esac
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=Sockets for udptunnel-client
+Documentation=man:udptunnel(1)
+
+[Socket]
+ListenDatagram=127.0.0.1:25779
+
+[Install]
+WantedBy=sockets.target
+
