@@ -1,36 +1,38 @@
-prefix = /usr/local
-
+PREFIX ?= /usr/local
+DESTDIR ?=
+BINDIR ?= $(PREFIX)/bin
 CFLAGS ?= -g -O2
-
 INSTALL ?= install
 PKG_CONFIG ?= pkg-config
 
 ifeq ($(shell $(PKG_CONFIG) --exists libsystemd || echo NO),)
-DEFS += -DHAVE_SYSTEMD_SD_DAEMON_H $(shell $(PKG_CONFIG) --cflags libsystemd)
-LDADD += $(shell $(PKG_CONFIG) --libs libsystemd)
+CPPFLAGS += -DHAVE_SYSTEMD_SD_DAEMON_H $(shell $(PKG_CONFIG) --cflags libsystemd)
+LDLIBS += $(shell $(PKG_CONFIG) --libs libsystemd)
 endif
 
-CPPFLAGS += $(DEFS) $(INCLUDES)
+CFLAGS += -MMD -MP
+CFLAGS += -Wall -Wextra
 
 OBJECTS := log.o network.o utils.o udptunnel.o
 
-all: depend udptunnel
+ifneq ($(V),1)
+BUILT_IN_LINK.o := $(LINK.o)
+LINK.o = @echo "  LD      $@";
+LINK.o += $(BUILT_IN_LINK.o)
+BUILT_IN_COMPILE.c := $(COMPILE.c)
+COMPILE.c = @echo "  CC      $@";
+COMPILE.c += $(BUILT_IN_COMPILE.c)
+endif
 
-install:
-	$(INSTALL) -d $(BASEDIR)$(prefix)/sbin/
-	$(INSTALL) -m 0755 udptunnel $(BASEDIR)$(prefix)/sbin/
+all: udptunnel
+
+install: udptunnel
+	@$(INSTALL) -v -d "$(DESTDIR)$(BINDIR)" && install -v -m 0755 udptunnel "$(DESTDIR)$(BINDIR)/udptunnel"
 
 clean:
-	rm -f Makefile.depend $(OBJECTS) udptunnel
-
-%.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $<
+	@$(RM) -vf $(OBJECTS) $(OBJECTS:%.o=%.d) udptunnel
 
 udptunnel: $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDADD) $(LIBS)
 
-depend: Makefile.depend
-Makefile.depend:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -MM -MG *.c > $@
-
--include Makefile.depend
+.PHONY: all install clean
+-include *.d
