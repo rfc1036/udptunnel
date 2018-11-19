@@ -387,6 +387,7 @@ static void send_handshake(struct relay *relay)
 
 static void wait_for_child(int sig)
 {
+    (void)sig;
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 

@@ -207,7 +207,7 @@ int *tcp_listener(const char *s)
 	if (listen(fd, 128) < 0)
 	    err_sys("listen");
 
-	if (allocated_fds < fd_num + 1 + 1) {
+	if (allocated_fds < (size_t)fd_num + 1 + 1) {
 	    allocated_fds += 8;
 	    fd_list = realloc(fd_list, allocated_fds * sizeof(int));
 	}
@@ -218,7 +218,7 @@ int *tcp_listener(const char *s)
     }
 
     /* and then add -1 as the list terminator */
-    if (allocated_fds < fd_num + 1 + 1)
+    if (allocated_fds < (size_t)fd_num + 1 + 1)
 	fd_list = realloc(fd_list, ++allocated_fds * sizeof(int));
     fd_list[fd_num] = -1;
 
