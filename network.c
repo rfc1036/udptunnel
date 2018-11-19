@@ -37,7 +37,8 @@
 
 char *print_addr_port(const struct sockaddr *addr, socklen_t addrlen)
 {
-    static char buf[1100], address[1025], port[32];
+    static char buf[NI_MAXHOST + NI_MAXSERV + 4];
+    char address[NI_MAXHOST], port[NI_MAXSERV];
     int err;
 
     err = getnameinfo(addr, addrlen, address, sizeof(address),
@@ -48,9 +49,9 @@ char *print_addr_port(const struct sockaddr *addr, socklen_t addrlen)
 	log_printf_exit(1, log_err, "getnameinfo: %s", gai_strerror(err));
 
     if (addr->sa_family == AF_INET6)
-	snprintf(buf, sizeof(buf) - 1, "[%s]:%s", address, port);
+	snprintf(buf, sizeof(buf), "[%s]:%s", address, port);
     else
-	snprintf(buf, sizeof(buf) - 1, "%s:%s", address, port);
+	snprintf(buf, sizeof(buf), "%s:%s", address, port);
 
     return buf;
 }
@@ -262,7 +263,7 @@ int accept_connections(int listening_sockets[])
 
 	for (i = 0; listening_sockets[i] != -1; i++) {
 	    int listen_sock;
-	    struct sockaddr_storage client_addr;
+	    struct sockaddr_storage client_addr = { 0 };
 	    socklen_t addrlen = sizeof(client_addr);
 
 	    if (!FD_ISSET(listening_sockets[i], &readfds))
