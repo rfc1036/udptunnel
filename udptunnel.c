@@ -379,9 +379,7 @@ static void tcp_to_udp(struct relay *relay)
 
 static void send_handshake(struct relay *relay)
 {
-    if (sendto(relay->tcp_sock, relay->handshake, sizeof(relay->handshake), 0,
-	       (struct sockaddr *) &relay->remote_udpaddr,
-	       sizeof(relay->remote_udpaddr)) < 0)
+    if (send(relay->tcp_sock, relay->handshake, sizeof(relay->handshake), 0) < 0)
 	err_sys("sendto(tcp, handshake)");
 }
 
